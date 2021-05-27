@@ -12,12 +12,9 @@ function route($method, $urlData, $formData)
             echo $mysqli->connect_error;
         } else {
             $UserToken = str_replace("Bearer ", "", $token);
-            $mysqli->query("UPDATE `user` SET `Status` = 'Offline' WHERE `user`.`Token` = '$UserToken'");
-            $mysqli->query("UPDATE `user` SET `Token` = NULL WHERE `user`.`Token` = '$UserToken'");
+            $mysqli->query("UPDATE `user` SET `Status` = 'Offline' WHERE `user`.`Token` = '$UserToken'") or die(mysqli_error($mysqli));
+            $mysqli->query("UPDATE `user` SET `Token` = NULL WHERE `user`.`Token` = '$UserToken'") or die(mysqli_error($mysqli));
             header('HTTP/1.0 200 OK');
-            echo json_encode(array(
-                'HTTP/1.0' => "200 OK"
-            ));
         }
     }
 

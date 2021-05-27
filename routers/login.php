@@ -1,25 +1,12 @@
 <?php
 include_once 'services/print.php';
+include_once 'services/checkPermission.php';
+include_once 'services/databaseConnection.php';
 
-function gen_token() {
-    $bytes = openssl_random_pseudo_bytes(15, $cstrong);
-    return bin2hex($bytes);
-}
-
-function strToHex($string)
-{
-    $hex = '';
-    for ($i = 0; $i < strlen($string); $i++) {
-        $ord = ord($string[$i]);
-        $hexCode = dechex($ord);
-        $hex .= substr('0' . $hexCode, -2);
-    }
-    return strToUpper($hex);
-}
 
 function route($method, $urlData, $formData)
 {
-    $mysqli = new mysqli("127.0.0.1", "root", "root", "lab7bd");
+    $mysqli = connectToDB();
     if ($method == 'POST') {
         if ($mysqli->connect_error) {
             echo 'Error №' . $mysqli->connect_errno . '<br>';
@@ -27,10 +14,7 @@ function route($method, $urlData, $formData)
         } else {
             $headers = getallheaders();
             if (isset($headers["Authorization"])){
-                header('HTTP/1.0 409 Conflict');
-                echo json_encode(array(
-                    'HTTP/1.0' => "409 Conflict"
-                ));
+                print409('System already get token');
                 return;
             }
             $username = $formData["Username"];
@@ -38,17 +22,11 @@ function route($method, $urlData, $formData)
             $userExist = $mysqli->query("SELECT * FROM `user` WHERE `user`.`Username` = '$username'");
             if($userExist->num_rows == 0){
                 header('HTTP/1.0 404 Not found');
-                echo json_encode(array(
-                    'HTTP/1.0' => "404 Not found"
-                ));
-                return;
+                die(0);
             } else {
                 $pwd = mysqli_fetch_array($mysqli->query("SELECT Password FROM `user` WHERE `user`.`Username` = '$username'"))[0];
                 if ($pwd != $password){
-                    header('HTTP/1.0 403 Forbidden');
-                    echo json_encode(array(
-                        'HTTP/1.0' => "403 Forbidden"
-                    ));
+                    print403('Wrong password');
                     return;
                 } else {
                     $token = gen_token();
@@ -56,9 +34,8 @@ function route($method, $urlData, $formData)
                     $mysqli->query("UPDATE `user` SET `Status` = 'Online' WHERE `user`.`Username` = '$username'");
                     header('HTTP/1.0 200 OK');
                     echo json_encode(array(
-                        'HTTP/1.0' => "200 OK"
+                        'Token' => $token
                     ));
-                    echo $token;
                 }
             }
 

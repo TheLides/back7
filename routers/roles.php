@@ -30,10 +30,10 @@ function get($urlData, $mysqli)
         echo $mysqli->connect_error;
     } else {
         if (count($urlData) == 0) {
-            printjsonRole($mysqli->query("SELECT * FROM `role`"));
+            printjsonRole($mysqli->query("SELECT * FROM `role`")) or die(mysqli_error($mysqli));
         }
         if (count($urlData) == 1) {
-            printjsonRole($mysqli->query("SELECT * FROM `role` WHERE `id` = '$urlData[0]'"));
+            printjsonRole($mysqli->query("SELECT * FROM `role` WHERE `id` = '$urlData[0]'")) or die(mysqli_error($mysqli));
         }
     }
 }
@@ -50,23 +50,14 @@ function post($formData, $mysqli)
             $model = new Role();
             if ($model->setName($formData["Name"])) {
                 $model->Name = $formData["Name"];
-                $mysqli->query("INSERT INTO `role` (`id`, `name`) VALUES (NULL, '$model->Name')");
+                $mysqli->query("INSERT INTO `role` (`id`, `name`) VALUES (NULL, '$model->Name')") or die(mysqli_error($mysqli));
                 header('HTTP/1.0 200 OK');
-                echo json_encode(array(
-                    'HTTP/1.0' => '200 OK'
-                ));
             } else {
                 header('HTTP/1.0 204 No Content');
-                echo json_encode(array(
-                    'HTTP/1.0' => "204 No Content"
-                ));
                 return;
             }
         } else {
             header('HTTP/1.0 403 Forbidden');
-            echo json_encode(array(
-                'HTTP/1.0' => "403 Forbidden"
-            ));
             return;
         }
     }
@@ -85,24 +76,15 @@ function patch($formData, $urlData, $mysqli)
             $model = new Role();
             if ($model->setName($formData["Name"]) && $urlData[0] != 1 && $urlData[0] != 2 && $urlData[0] != 3) {
                 $model->Name = $formData["Name"];
-                $mysqli->query("UPDATE `role` SET `Name` = '$model->Name' WHERE `role`.`Id` = '$urlData[0]'");
+                $mysqli->query("UPDATE `role` SET `Name` = '$model->Name' WHERE `role`.`Id` = '$urlData[0]'") or die(mysqli_error($mysqli));
                 header('HTTP/1.0 200 OK');
-                echo json_encode(array(
-                    'HTTP/1.0' => "200 OK"
-                ));
                 return;
             } else {
                 header('HTTP/1.0 403 Forbidden');
-                echo json_encode(array(
-                    'HTTP/1.0' => "403 Forbidden"
-                ));
                 return;
             }
         } else {
             header('HTTP/1.0 403 Forbidden');
-            echo json_encode(array(
-                'HTTP/1.0' => "403 Forbidden"
-            ));
             return;
         }
     }
@@ -119,24 +101,15 @@ function delete($urlData, $mysqli)
         $per = checkPermission($headers["Authorization"]);
         if ($per == 1) {
             if ($urlData[0] != 1 && $urlData[0] != 2 && $urlData[0] != 3) {
-                $mysqli->query("DELETE FROM `role` WHERE `role`.`Id` = '$urlData[0]'");
+                $mysqli->query("DELETE FROM `role` WHERE `role`.`Id` = '$urlData[0]'") or die(mysqli_error($mysqli));
                 header('HTTP/1.0 200 OK');
-                echo json_encode(array(
-                    'HTTP/1.0' => "200 OK"
-                ));
                 return;
             } else {
                 header('HTTP/1.0 403 Forbidden');
-                echo json_encode(array(
-                    'HTTP/1.0' => "403 Forbidden"
-                ));
                 return;
             }
         } else {
             header('HTTP/1.0 403 Forbidden');
-            echo json_encode(array(
-                'HTTP/1.0' => "403 Forbidden"
-            ));
             return;
         }
     }

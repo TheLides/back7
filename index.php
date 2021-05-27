@@ -39,5 +39,13 @@ $router = $urls[0];
 $urlData = array_slice($urls, 1); //удаляем роутер из запроса
 
 // Подключаем файл-роутер и запускаем главную функцию
-include_once 'routers/' . $router . '.php'; //include_once подключает внешний файл с кодом
-route($method, $urlData, $formData);
+ //include_once подключает внешний файл с кодом
+try{
+    include_once 'routers/' . $router . '.php';
+    route($method, $urlData, $formData);
+} catch (Exception $e){
+    header('HTTP/1.0 500 Internal Server Error');
+    $obj = new stdClass();
+    $obj->message = 'Выброшено исключение: ' . $e->getMessage();
+    echo json_encode($obj);
+}

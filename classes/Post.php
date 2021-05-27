@@ -1,12 +1,14 @@
 <?php
 
+include_once 'services/validation.php';
+
 class Post
 {
     public $Text;
 
     public function setText($text)
     {
-        if (!is_string($text) || $text == "") {
+        if (!validateString($text)) {
             return false;
         } else {
             return true;
@@ -17,26 +19,78 @@ class Post
 
 class UserPostViewModel
 {
+    public $Id;
     public $UserId;
     public $Text;
     public $Date;
 
-    public function __construct($userId, $text, $date)
+    public function __construct($id, $userId, $text, $date)
     {
-        $this->UserId = $userId;
-        $this->Text = $text;
-        $this->Date = $date;
+        if (!validateNumber($id)) {
+            throw new Exception('Smth went wrong');
+        } else {
+            $this->Id = $id;
+        }
+        if (!validateNumber($userId)) {
+            throw new Exception('Smth went wrong');
+        } else {
+            $this->UserId = $userId;
+        }
+        if (!validateString($text)) {
+            throw new Exception('Smth went wrong');
+        } else {
+            $this->Text = $text;
+        }
+        if (!validateString($date)) {
+            throw new Exception('Smth went wrong');
+        } else {
+            $this->Date = $date;
+        }
     }
 }
 
 class PostViewModel
+{
+    public $Id;
+    public $Text;
+    public $Date;
+
+    public function __construct($id, $text, $date)
+    {
+        if (!validateNumber($id)) {
+            throw new Exception('Smth went wrong');
+        } else {
+            $this->Id = $id;
+        }
+        if (!validateString($text)) {
+            throw new Exception('Smth went wrong');
+        } else {
+            $this->Text = $text;
+        }
+        if (!validateString($date)) {
+            throw new Exception('Smth went wrong');
+        } else {
+            $this->Date = $date;
+        }
+    }
+}
+
+class PostUserViewModel
 {
     public $Text;
     public $Date;
 
     public function __construct($text, $date)
     {
-        $this->Text = $text;
-        $this->Date = $date;
+        if (!validateString($text)) {
+            throw new Exception('Smth went wrong1');
+        } else {
+            $this->Text = $text;
+        }
+        if (!validateString($date)) {
+            throw new Exception('Smth went wrong2');
+        } else {
+            $this->Date = $date;
+        }
     }
 }

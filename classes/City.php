@@ -1,10 +1,13 @@
 <?php
+
+include_once 'services/validation.php';
+
 class City {
     public $Name;
 
     public function setName($name)
     {
-        if (!is_string($name) || $name == "") {
+        if (!validateString($name)) {
             return false;
         } else {
             return true;
@@ -19,7 +22,17 @@ class CityViewModel {
 
     public function __construct($id, $name)
     {
-        $this->Id = $id;
-        $this->Name = $name;
+        if (!validateString($name)) {
+            throw new Exception('Smth went wrong');
+        } else {
+            $this->Name = $name;
+        }
+        if (!validateNumber($id)){
+            throw new Exception('Smth went wrong');
+        }
+        else {
+            $this->Id = $id;
+        }
+
     }
 }

@@ -28,10 +28,10 @@ function get($mysqli, $urlData)
         echo $mysqli->connect_error;
     } else {
         if (count($urlData) == 0) {
-            printjsonPosts($mysqli->query("SELECT * FROM `post`"));
+            printjsonPosts($mysqli->query("SELECT * FROM `post`")) or die(mysqli_error($mysqli));
         }
         if (count($urlData) == 1) {
-            printjsonPosts($mysqli->query("SELECT * FROM `post` WHERE `id` = '$urlData[0]'"));
+            printjsonPosts($mysqli->query("SELECT * FROM `post` WHERE `id` = '$urlData[0]'")) or die(mysqli_error($mysqli));
         }
     }
 }
@@ -47,7 +47,7 @@ function post($formData, $mysqli)
             $per = checkPermission($headers["Authorization"]);
             if ($per != 0) {
                 $UserToken = str_replace("Bearer ", "", $headers["Authorization"]);
-                $UserId = mysqli_fetch_array($mysqli->query("SELECT Id FROM `user` WHERE `user`.`Token` = '$UserToken'"))[0];
+                $UserId = mysqli_fetch_array($mysqli->query("SELECT Id FROM `user` WHERE `user`.`Token` = '$UserToken'"))[0] or die(mysqli_error($mysqli));
                 $model = new Post();
                 if ($model->setText($formData["Text"])) {
                     $model->Text = $formData["Text"];
@@ -55,29 +55,17 @@ function post($formData, $mysqli)
                     $model->Text = mysqli_real_escape_string($mysqli, $model->Text);
                     $mysqli->query("INSERT INTO `post` (`userid`, `text`, `date`) VALUES ($UserId,'$model->Text', '$date')") or die(mysqli_error($mysqli));
                     header('HTTP/1.0 200 OK');
-                    echo json_encode(array(
-                        'HTTP/1.0' => '200 OK'
-                    ));
                     return;
                 } else {
                     header('HTTP/1.0 204 No Content');
-                    echo json_encode(array(
-                        'HTTP/1.0' => "204 No Content"
-                    ));
                     return;
                 }
             } else {
                 header('HTTP/1.0 401 Unauthorized');
-                echo json_encode(array(
-                    'HTTP/1.0' => "401 Unauthorized"
-                ));
                 return;
             }
         } else {
             header('HTTP/1.0 400 Bad Request');
-            echo json_encode(array(
-                'HTTP/1.0' => "401 Bad Request"
-            ));
             return;
         }
     }
@@ -94,8 +82,8 @@ function patch($formData, $urlData, $mysqli)
         if (isset($headers["Authorization"])) {
             $per = checkPermission($headers["Authorization"]);
             $UserToken = str_replace("Bearer ", "", $headers["Authorization"]);
-            $UserId = mysqli_fetch_array($mysqli->query("SELECT Id FROM `user` WHERE `user`.`Token` = '$UserToken'"))[0];
-            $postOwnerId = mysqli_fetch_array($mysqli->query("SELECT UserId FROM `post` WHERE `post`.`Id` = '$urlData[0]'"));
+            $UserId = mysqli_fetch_array($mysqli->query("SELECT Id FROM `user` WHERE `user`.`Token` = '$UserToken'"))[0] or die(mysqli_error($mysqli));
+            $postOwnerId = mysqli_fetch_array($mysqli->query("SELECT UserId FROM `post` WHERE `post`.`Id` = '$urlData[0]'")) or die(mysqli_error($mysqli));
             if ($per == 1 || $per == 2 || $UserId == $postOwnerId) {
                 if (count($urlData) == 1) {
                     if (!is_numeric($urlData[0])) {
@@ -108,31 +96,19 @@ function patch($formData, $urlData, $mysqli)
                         $model->Text = mysqli_real_escape_string($mysqli, $model->Text);
                         $mysqli->query("UPDATE `post` SET `Text` = '$model->Text' WHERE `post`.`Id` = '$urlData[0]'") or die(mysqli_error($mysqli));
                         header('HTTP/1.0 200 OK');
-                        echo json_encode(array(
-                            'HTTP/1.0' => "200 OK"
-                        ));
                         return;
                     } else {
                         header('HTTP/1.0 204 No Content');
-                        echo json_encode(array(
-                            'HTTP/1.0' => "204 No Content"
-                        ));
                         return;
                     }
                 }
             } else {
                 header('HTTP/1.0 403 Forbidden');
-                echo json_encode(array(
-                    'HTTP/1.0' => "403 Forbidden"
-                ));
                 return;
             }
 
         } else {
             header('HTTP/1.0 401 Unauthorized');
-            echo json_encode(array(
-                'HTTP/1.0' => "401 Unauthorized"
-            ));
             return;
         }
     }
@@ -148,32 +124,23 @@ function delete($urlData, $mysqli)
         if (isset($headers["Authorization"])) {
             $per = checkPermission($headers["Authorization"]);
             $UserToken = str_replace("Bearer ", "", $headers["Authorization"]);
-            $UserId = mysqli_fetch_array($mysqli->query("SELECT Id FROM `user` WHERE `user`.`Token` = '$UserToken'"))[0];
-            $postOwnerId = mysqli_fetch_array($mysqli->query("SELECT UserId FROM `post` WHERE `post`.`Id` = '$urlData[0]'"));
+            $UserId = mysqli_fetch_array($mysqli->query("SELECT Id FROM `user` WHERE `user`.`Token` = '$UserToken'"))[0] or die(mysqli_error($mysqli));
+            $postOwnerId = mysqli_fetch_array($mysqli->query("SELECT UserId FROM `post` WHERE `post`.`Id` = '$urlData[0]'")) or die(mysqli_error($mysqli));
             if ($per == 1 || $per == 2 || $UserId == $postOwnerId) {
                 if (count($urlData) == 1) {
                     if (!is_numeric($urlData[0])) {
                         header('X-PHP-Response-Code: 404', true, 404);
                         return;
                     }
-                    $mysqli->query("DELETE FROM `post` WHERE `post`.`Id` = '$urlData[0]'");
+                    $mysqli->query("DELETE FROM `post` WHERE `post`.`Id` = '$urlData[0]'") or die(mysqli_error($mysqli));
                     header('HTTP/1.0 200 OK');
-                    echo json_encode(array(
-                        'HTTP/1.0' => "200 OK"
-                    ));
                 }
             } else {
                 header('HTTP/1.0 403 Forbidden');
-                echo json_encode(array(
-                    'HTTP/1.0' => "403 Forbidden"
-                ));
                 return;
             }
         } else {
             header('HTTP/1.0 401 Unauthorized');
-            echo json_encode(array(
-                'HTTP/1.0' => "401 Unauthorized"
-            ));
             return;
         }
     }

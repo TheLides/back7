@@ -1,28 +1,26 @@
 <?php
-
-class Photo
-{
-    public $Link;
-
-    public function setLink($link)
-    {
-        if (!is_string($link) || $link == "") {
-            return false;
-        } else {
-            return true;
-        }
-    }
-}
-
+include_once 'services/validation.php';
 
 class PhotoViewModel
 {
+    public $Id;
     public $Link;
     public $CreatorId;
 
-    public function __construct($link, $creatorId)
+    public function __construct($id, $link, $creatorId)
     {
-        $this->CreatorId = $creatorId;
+        if (!validateNumber($id)) {
+            throw new Exception('Smth went wrong');
+        } else {
+            $this->Id = $id;
+        }
+        if (!validateNumber($creatorId)) {
+            throw new Exception('Smth went wrong');
+        } else {
+            $this->CreatorId = $creatorId;
+        }
+       
         $this->Link = $link;
+
     }
 }
